@@ -114,20 +114,19 @@ let rec eval_expr env expr =
         |Efun (args, expr) -> Tfunc(args, expr, env), env;
         |Eapply (funct, expr_lst) -> 
             begin
-            let rec helper env args exprs i = 
+            let rec helper env argenv args exprs i = 
                 match i with
-                |(-1) -> env, (-1);
+                |(-1) -> argenv, (-1);
                 |x ->
                     let foo = eval_expr env (List.nth exprs i) in
-                    helper (StringMap.add (fst (List.nth args i) ) (fst foo) (snd foo) ) args exprs (i-1);
+                    helper env (StringMap.add (fst (List.nth args i) ) (fst foo) argenv ) args exprs (i-1);
             in
-            let wrapper_helper env args exprs  = helper env  args exprs ((List.length args) -1 ) in 
             let foo = eval_expr env funct in
             match fst foo with
                 |Tfunc(arg_lst, expr, fenv) -> 
-                    let newenv = fst (wrapper_helper (snd foo) arg_lst expr_lst ) in 
-                    
-                    let foo2 = eval_expr newenv expr in
-                    fst foo2, snd foo2;
+                    let wrapper_helper env args exprs  = helper env fenv args exprs ((List.length args) -1 ) in 
+                    let argenv = fst (wrapper_helper (snd foo) arg_lst expr_lst ) in 
+                    let foo2 = eval_expr argenv expr in
+                    fst foo2, snd foo;
             end
 ;;

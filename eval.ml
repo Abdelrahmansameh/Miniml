@@ -42,6 +42,9 @@ let eval_unary op cnst =
     match cnst with
         |Tint(x) -> Tint (-x);
         |Tbool(b) -> Tbool (not b);
+        |Tprod(_,_) -> raise (T "Wrong type for unary\n");
+        |Tfunc(_,_,_) -> raise (T "Wrong type for unary\n");
+        |Tname(_) -> raise (T "Wrong type for unary\n");
 
 ;;
 let eval_binary op cnst1 cnst2 = 
@@ -49,7 +52,7 @@ let eval_binary op cnst1 cnst2 =
         |Tint(x1), Tint(x2) -> 
                     begin
                     match op with
-                        | Bband -> raise (T "Wrong type\n");
+                        | Bband -> raise (T "Wrong type: BoolAnd with integers\n");
                         | Biadd -> Tint(x1 + x2);
                         | Bisub -> Tint(x1 - x2);
                         | Bimul -> Tint(x1 * x2);
@@ -61,15 +64,24 @@ let eval_binary op cnst1 cnst2 =
                     begin
                     match op with
                         | Bband -> Tbool( b1 && b2);
-                        | Biadd -> raise (T "Wrong type\n");
-                        | Bisub -> raise (T "Wrong type\n");
-                        | Bimul -> raise (T "Wrong type\n");
-                        | Bidiv -> raise (T "Wrong type\n");
-                        | Bcleq -> raise (T "Wrong type\n");
-                        | Bceq  -> raise (T "Wrong type\n");
+                        | Biadd -> raise (T "Wrong type: addition with bool\n");
+                        | Bisub -> raise (T "Wrong type: subtraction with bool\n");
+                        | Bimul -> raise (T "Wrong type: multiplication with bool\n");
+                        | Bidiv -> raise (T "Wrong type: division with bool\n");
+                        | Bcleq -> raise (T "Wrong type: inequality with bool\n");
+                        | Bceq  -> raise (T "Wrong type: equality with bool\n");
                     end
-        |Tbool(_), Tint(_) -> raise (T "Wrong type\n");
-        |Tint(_), Tbool(_) -> raise (T "Wrong type\n");
+        |Tbool(_), Tint(_) -> raise (T "Not the same type\n");
+        |Tint(_), Tbool(_) -> raise (T "Wrong type for binop\n");
+        |Tint _, Tprod (_, _) -> raise (T "Wrong type for binop\n");
+        |Tint _, Tfunc (_, _,_) -> raise (T "Wrong type for binop\n");
+        |Tint _, Tname _ -> raise (T "Wrong type for binop\n");
+        |Tbool _, Tprod (_, _) -> raise (T "Wrong type for binop\n");
+        |Tbool _, Tfunc (_, _,_) -> raise (T "Wrong type for binop\n");
+        |Tbool _, Tname _ -> raise (T "Wrong type for binop\n");
+        |Tprod(_,_), _ -> raise (T "Wrong type for binop\n");
+        |Tfunc(_,_,_), _ -> raise (T "Wrong type for binop\n");
+        |Tname _, _ -> raise (T "Wrong type for binop\n");
 ;;
 
 
@@ -101,6 +113,10 @@ let rec eval_expr env expr =
             match fst foo1 with 
                 |Tbool(b) -> 
                     if b then (eval_expr (snd foo1) y) else (eval_expr (snd foo1) z);
+                |Tint _ -> raise (T "condition is not a boolean\n");
+                |Tprod(_,_) -> raise (T "condition is not a boolean\n");
+                |Tfunc(_,_,_) -> raise (T "condition is not a boolean\n");
+                |Tname _ -> raise (T "condition is not a boolean\n");
             end
         |Epair(x, y) -> 
             let foo1 = (eval_expr env x) in
@@ -128,5 +144,9 @@ let rec eval_expr env expr =
                     let argenv = fst (wrapper_helper (snd foo) arg_lst expr_lst ) in 
                     let foo2 = eval_expr argenv expr in
                     fst foo2, snd foo;
+                |Tint _ -> raise (T "Wrong type\n");
+                |Tprod(_,_) -> raise (T "Wrong type\n");
+                |Tbool _ -> raise (T "Wrong type\n");
+                |Tname _ -> raise (T "Wrong type\n");
             end
 ;;

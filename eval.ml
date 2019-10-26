@@ -4,15 +4,17 @@ exception T of string
 
 module StringMap = Map.Make(String);;
 
-
+(*Target value types*)
 type t = 
     | Tint of int
     | Tbool of bool
     | Tprod of t * t
-    | Tfunc of arg list * expr * t StringMap.t
+    | Tfunc of arg list * expr * t StringMap.t (*Functions hold the environment in which they were defined*)
 
+(*Store the value of variables*)
 type env = t StringMap.t;;
 
+(*print function*)
 let rec p_t oc t =
     match t with    
         |Tint(x) -> Printf.fprintf oc "%d" x;
@@ -29,7 +31,7 @@ let rec p_t oc t =
                     StringMap.iter foo fenv;
                     Printf.fprintf oc ")\n";
 ;;
-
+(*print function*)
 let p_env oc en = 
                 let foo k v =  Printf.fprintf oc "%s : " k; p_t oc v; Printf.fprintf oc "\n" in
                 StringMap.iter foo en;
@@ -78,14 +80,10 @@ let eval_binary op cnst1 cnst2 =
 
 
 let rec eval_expr env expr = 
-    print_string("############################ \n");
-    print_string("Expr: ");
-    p_expr stdout expr;
-    print_string("\n");
-    print_string("\n");
-    print_string("Env: ");
-    p_env stdout (env);
-    print_string("\n");
+    (*
+    Evaluate the expression, returns the new 
+    environment after evaluation, and the value 
+    *)
     match expr with
         |Econst(const) ->
             begin       
@@ -124,8 +122,12 @@ let rec eval_expr env expr =
         |Eapply (funct, expr_lst) -> 
             begin
             let rec helper env argenv args exprs i = 
+                (*Iterates over the arguments lists from the call
+                and the definition simultaneously and adds
+                them to the environment where the expression
+                of the function will be evaluated *)
                 match i with
-                |(-1) -> argenv, (-1);
+                |(-1) -> argenv, (-1); 
                 |x ->
                     let foo = eval_expr env (List.nth exprs i) in
                     helper env (StringMap.add (fst (List.nth args i) ) (fst foo) argenv ) args exprs (i-1);
@@ -137,8 +139,8 @@ let rec eval_expr env expr =
                     let argenv = fst (wrapper_helper (snd foo) arg_lst expr_lst ) in 
                     let foo2 = eval_expr argenv expr in
                     fst foo2, snd foo;
-                |Tint _ -> raise (T "Wrong type\n");
-                |Tprod(_,_) -> raise (T "Wrong type\n");
-                |Tbool _ -> raise (T "Wrong type\n");
+                |Tint _ -> raise (T "Argument is not callable\n");
+                |Tprod(_,_) -> raise (T "Argument is not callable\n");
+                |Tbool _ -> raise (T "Argument is not callable\n");
             end
 ;;

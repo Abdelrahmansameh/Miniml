@@ -10,7 +10,6 @@ type t =
     | Tbool of bool
     | Tprod of t * t
     | Tfunc of arg list * expr * t StringMap.t
-    | Tname of string
 
 type env = t StringMap.t;;
 
@@ -18,7 +17,6 @@ let rec p_t oc t =
     match t with    
         |Tint(x) -> Printf.fprintf oc "%d" x;
         |Tbool(b) -> Printf.fprintf oc "%b" b;
-        |Tname(name) -> Printf.fprintf oc "%s" name;
         |Tprod(t1, t2) -> p_t oc t1; Printf.fprintf oc "*"; p_t oc t2;
         |Tfunc(args, x, fenv) -> 
                     Printf.fprintf oc "(";
@@ -44,7 +42,6 @@ let eval_unary op cnst =
         |Tbool(b) -> Tbool (not b);
         |Tprod(_,_) -> raise (T "Wrong type for unary\n");
         |Tfunc(_,_,_) -> raise (T "Wrong type for unary\n");
-        |Tname(_) -> raise (T "Wrong type for unary\n");
 
 ;;
 let eval_binary op cnst1 cnst2 = 
@@ -75,13 +72,10 @@ let eval_binary op cnst1 cnst2 =
         |Tint(_), Tbool(_) -> raise (T "Wrong type for binop\n");
         |Tint _, Tprod (_, _) -> raise (T "Wrong type for binop\n");
         |Tint _, Tfunc (_, _,_) -> raise (T "Wrong type for binop\n");
-        |Tint _, Tname _ -> raise (T "Wrong type for binop\n");
         |Tbool _, Tprod (_, _) -> raise (T "Wrong type for binop\n");
         |Tbool _, Tfunc (_, _,_) -> raise (T "Wrong type for binop\n");
-        |Tbool _, Tname _ -> raise (T "Wrong type for binop\n");
         |Tprod(_,_), _ -> raise (T "Wrong type for binop\n");
         |Tfunc(_,_,_), _ -> raise (T "Wrong type for binop\n");
-        |Tname _, _ -> raise (T "Wrong type for binop\n");
 ;;
 
 
@@ -116,7 +110,6 @@ let rec eval_expr env expr =
                 |Tint _ -> raise (T "condition is not a boolean\n");
                 |Tprod(_,_) -> raise (T "condition is not a boolean\n");
                 |Tfunc(_,_,_) -> raise (T "condition is not a boolean\n");
-                |Tname _ -> raise (T "condition is not a boolean\n");
             end
         |Epair(x, y) -> 
             let foo1 = (eval_expr env x) in
@@ -147,6 +140,5 @@ let rec eval_expr env expr =
                 |Tint _ -> raise (T "Wrong type\n");
                 |Tprod(_,_) -> raise (T "Wrong type\n");
                 |Tbool _ -> raise (T "Wrong type\n");
-                |Tname _ -> raise (T "Wrong type\n");
             end
 ;;

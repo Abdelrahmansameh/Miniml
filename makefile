@@ -3,11 +3,13 @@ FILES=	ast.ml     \
 	parser.mly \
 	printer.ml \
 	main.ml \
+	type.ml \
 	eval.ml
 
 CMOS=  unix.cma ast.cmo      \
 	parser.cmo lexer.cmo  \
 	printer.cmo eval.cmo \
+	type.cmo \
 	main.cmo \
 
 exec.exe: $(FILES)
@@ -15,6 +17,7 @@ exec.exe: $(FILES)
 	ocamlc -c printer.mli 	 && \
 	ocamlc -c printer.ml 	 && \
 	ocamlc -c eval.ml && \
+	ocamlc -c type.ml && \
 	ocamlyacc -v parser.mly  && \
 	ocamllex  lexer.mll      && \
 	ocamlc -c parser.mli     && \

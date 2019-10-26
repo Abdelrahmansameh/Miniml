@@ -1,4 +1,5 @@
 open Ast
+open Printer
 exception T of string
 
 module StringMap = Map.Make(String);;
@@ -87,17 +88,23 @@ let type_binary op cnst1 cnst2 =
         |_, _ -> raise (T "Not the same type\n");
 ;;
 
-let rec argtotype env arg = 
-    match (snd arg) with 
+let rec typtotype env (arg:typ) = 
+    match arg with 
         | Tint -> Typint
         | Tbool -> Typbool
-        | Tprod(x,y) -> Typrod(argtotype env x, argtotype env y)
-        | Tarrow(x, y) -> Typfunc(argtotypes env x, argtotype env y, env) 
+        | Tprod(x,y) -> Typrod(typtotype env x, typtotype env y)
+        | Tarrow(x, y) -> Typfunc(typstotypes env x, typtotype env y, env) 
 
-and argtotypes env args =
+and typstotypes env (args : typ list) =
     match args with
         |[] -> []
-        |arg :: tl -> argtotype env arg :: argtotypes env tl
+        |arg :: tl -> typtotype env arg :: typstotypes env tl
+;;
+
+let rec argstotypes env args = 
+    match args with
+        |[] -> []
+        |arg :: tl -> typtotype env (snd arg) :: argstotypes env tl
 ;;
 
 let rec type_expr env expr = 
@@ -127,9 +134,9 @@ let rec type_expr env expr =
             let foo1 = (type_expr env x) in 
             match fst foo1 with 
                 |Typbool -> 
-                    let foo2 = (typ_expr (snd foo1) y) in
-                    let foo3 = (typ_expr (snd foo1) z) in
-                    if (fst foo2) = (fst foo 3) then ((fst foo2), (snd foo1)) else raise (T "Error typing ifelse\n");
+                    let foo2 = (type_expr (snd foo1) y) in
+                    let foo3 = (type_expr (snd foo1) z) in
+                    if (fst foo2) = (fst foo3) then ((fst foo2), (snd foo1)) else raise (T "Error typing ifelse\n");
                 |_ -> raise (T "condition is not a boolean\n");
             end
         |Epair(x, y) -> 
@@ -141,26 +148,35 @@ let rec type_expr env expr =
             let newenv = StringMap.add n (fst foo) (snd foo) in
             let foo2 = (type_expr newenv y) in
             (fst foo2), env;
-        |Efun (args, expr) -> Typfunc(args, expr, env), env;
+        |Efun (args, expr) -> 
+            begin
+            let typlst =  argstotypes env args in
+            let rec helper argenv args typs i = 
+                match i with 
+                |(-1) -> argenv, (-1)
+                |x -> helper (StringMap.add (fst (List.nth args i)) (List.nth typs i) argenv) args typs (i-1) 
+            in
+            let wrapper_helper env args typlst  = helper env args typlst ((List.length args) -1 ) in 
+            let newenv = fst (wrapper_helper env args typlst) in
+            Typfunc(typlst, (fst (type_expr newenv expr)), env), env;
+            end
         |Eapply (funct, expr_lst) -> 
             begin
-            let rec helper env argenv args exprs i = 
+            let rec helper env res args exprs i = 
                 match i with
-                |(-1) -> argenv, (-1);
+                |(-1) -> res, (-1);
                 |x ->
-                    let foo = eval_expr env (List.nth exprs i) in
-                    helper env (StringMap.add (fst (List.nth args i) ) (fst foo) argenv ) args exprs (i-1);
+                    let foo = type_expr env (List.nth exprs i) in
+                    helper env ( (List.nth args i)= (fst foo) && res) args exprs (i-1);
             in
-            let foo = eval_expr env funct in
+            let foo = type_expr env funct in
             match fst foo with
-                |Tfunc(arg_lst, expr, fenv) -> 
-                    let wrapper_helper env args exprs  = helper env fenv args exprs ((List.length args) -1 ) in 
-                    let argenv = fst (wrapper_helper (snd foo) arg_lst expr_lst ) in 
-                    let foo2 = eval_expr argenv expr in
-                    fst foo2, snd foo;
-                |Tint _ -> raise (T "Wrong type\n");
-                |Tprod(_,_) -> raise (T "Wrong type\n");
-                |Tbool _ -> raise (T "Wrong type\n");
-                |Tname _ -> raise (T "Wrong type\n");
+                |Typfunc(arg_lst, expr, fenv) -> 
+                    let wrapper_helper env args exprs  = helper env true args exprs ((List.length args) -1 ) in 
+                    let b = fst (wrapper_helper (snd foo) arg_lst expr_lst ) in 
+                    if b then expr, env else raise(T "Arguments have wrong types\n")
+                |Typint -> raise (T "Wrong type\n");
+                |Typrod(_,_) -> raise (T "Wrong type\n");
+                |Typbool -> raise (T "Wrong type\n");
             end
 ;;

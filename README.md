@@ -1,3 +1,6 @@
 # Miniml
 
-run make... its pretty straightforward
+run:
+
+$ make
+$ ./exec ./examples/t-01.ml;      (example from 01 to 09)

@@ -1,0 +1,1163 @@
+   0  $accept : %entry% $end
+
+   1  prog : expr T_eof
+
+   2  expr : T_let V_string T_equal expr T_in expr
+   3       | T_let T_rec V_string T_equal expr T_in expr
+   4       | T_fun pars T_arrow expr
+   5       | T_if expr T_then expr T_else expr
+   6       | expr0
+
+   7  expr0 : expr0 T_and expr1
+   8        | expr1
+
+   9  expr1 : expr1 T_leq expr2
+  10        | expr1 T_equal expr2
+  11        | expr2
+
+  12  expr2 : expr2 T_add expr3
+  13        | expr2 T_sub expr3
+  14        | expr3
+
+  15  expr3 : expr3 T_mul expr4
+  16        | expr3 T_div expr4
+  17        | expr4
+
+  18  expr4 : T_sub expr5
+  19        | T_not expr5
+  20        | T_fst expr5
+  21        | T_snd expr5
+  22        | expr5
+
+  23  expr5 : expr6
+  24        | expr6 args
+
+  25  expr6 : const
+  26        | V_string
+  27        | T_lpar expr0 T_comma expr0 T_rpar
+  28        | T_lpar expr0 T_rpar
+
+  29  const : bool
+  30        | V_int
+
+  31  bool : T_false
+  32       | T_true
+
+  33  args : expr6
+  34       | expr6 args
+
+  35  pars : par
+  36       | par pars
+
+  37  par : T_lpar V_string T_colon typ T_rpar
+
+  38  typ : typ T_mul typ0
+  39      | typ0
+
+  40  typ0 : T_int
+  41       | T_bool
+
+  42  %entry% : '\001' prog
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . prog  (42)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	prog  goto 15
+	expr  goto 16
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	const : V_int .  (30)
+
+	.  reduce 30
+
+
+state 4
+	expr6 : V_string .  (26)
+
+	.  reduce 26
+
+
+state 5
+	expr : T_fun . pars T_arrow expr  (4)
+
+	T_lpar  shift 26
+	.  error
+
+	pars  goto 27
+	par  goto 28
+
+
+state 6
+	expr : T_if . expr T_then expr T_else expr  (5)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 29
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 7
+	expr : T_let . V_string T_equal expr T_in expr  (2)
+	expr : T_let . T_rec V_string T_equal expr T_in expr  (3)
+
+	V_string  shift 30
+	T_rec  shift 31
+	.  error
+
+
+state 8
+	bool : T_false .  (31)
+
+	.  reduce 31
+
+
+state 9
+	bool : T_true .  (32)
+
+	.  reduce 32
+
+
+state 10
+	expr4 : T_fst . expr5  (20)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_lpar  shift 14
+	.  error
+
+	expr5  goto 32
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 11
+	expr4 : T_not . expr5  (19)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_lpar  shift 14
+	.  error
+
+	expr5  goto 33
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 12
+	expr4 : T_snd . expr5  (21)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_lpar  shift 14
+	.  error
+
+	expr5  goto 34
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 13
+	expr4 : T_sub . expr5  (18)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_lpar  shift 14
+	.  error
+
+	expr5  goto 35
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 14
+	expr6 : T_lpar . expr0 T_comma expr0 T_rpar  (27)
+	expr6 : T_lpar . expr0 T_rpar  (28)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr0  goto 36
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 15
+	%entry% : '\001' prog .  (42)
+
+	.  reduce 42
+
+
+state 16
+	prog : expr . T_eof  (1)
+
+	T_eof  shift 37
+	.  error
+
+
+state 17
+	expr : expr0 .  (6)
+	expr0 : expr0 . T_and expr1  (7)
+
+	T_and  shift 38
+	T_eof  reduce 6
+	T_else  reduce 6
+	T_in  reduce 6
+	T_then  reduce 6
+
+
+state 18
+	expr0 : expr1 .  (8)
+	expr1 : expr1 . T_leq expr2  (9)
+	expr1 : expr1 . T_equal expr2  (10)
+
+	T_equal  shift 39
+	T_leq  shift 40
+	T_eof  reduce 8
+	T_else  reduce 8
+	T_in  reduce 8
+	T_then  reduce 8
+	T_and  reduce 8
+	T_rpar  reduce 8
+	T_comma  reduce 8
+
+
+state 19
+	expr1 : expr2 .  (11)
+	expr2 : expr2 . T_add expr3  (12)
+	expr2 : expr2 . T_sub expr3  (13)
+
+	T_add  shift 41
+	T_sub  shift 42
+	T_eof  reduce 11
+	T_else  reduce 11
+	T_in  reduce 11
+	T_then  reduce 11
+	T_equal  reduce 11
+	T_and  reduce 11
+	T_leq  reduce 11
+	T_rpar  reduce 11
+	T_comma  reduce 11
+
+
+state 20
+	expr2 : expr3 .  (14)
+	expr3 : expr3 . T_mul expr4  (15)
+	expr3 : expr3 . T_div expr4  (16)
+
+	T_mul  shift 43
+	T_div  shift 44
+	T_eof  reduce 14
+	T_else  reduce 14
+	T_in  reduce 14
+	T_then  reduce 14
+	T_add  reduce 14
+	T_sub  reduce 14
+	T_equal  reduce 14
+	T_and  reduce 14
+	T_leq  reduce 14
+	T_rpar  reduce 14
+	T_comma  reduce 14
+
+
+state 21
+	expr3 : expr4 .  (17)
+
+	.  reduce 17
+
+
+state 22
+	expr4 : expr5 .  (22)
+
+	.  reduce 22
+
+
+state 23
+	expr5 : expr6 .  (23)
+	expr5 : expr6 . args  (24)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_lpar  shift 14
+	T_eof  reduce 23
+	T_else  reduce 23
+	T_in  reduce 23
+	T_then  reduce 23
+	T_add  reduce 23
+	T_sub  reduce 23
+	T_mul  reduce 23
+	T_div  reduce 23
+	T_equal  reduce 23
+	T_and  reduce 23
+	T_leq  reduce 23
+	T_rpar  reduce 23
+	T_comma  reduce 23
+
+	expr6  goto 45
+	args  goto 46
+	const  goto 24
+	bool  goto 25
+
+
+state 24
+	expr6 : const .  (25)
+
+	.  reduce 25
+
+
+state 25
+	const : bool .  (29)
+
+	.  reduce 29
+
+
+state 26
+	par : T_lpar . V_string T_colon typ T_rpar  (37)
+
+	V_string  shift 47
+	.  error
+
+
+state 27
+	expr : T_fun pars . T_arrow expr  (4)
+
+	T_arrow  shift 48
+	.  error
+
+
+state 28
+	pars : par .  (35)
+	pars : par . pars  (36)
+
+	T_lpar  shift 26
+	T_arrow  reduce 35
+
+	pars  goto 49
+	par  goto 28
+
+
+state 29
+	expr : T_if expr . T_then expr T_else expr  (5)
+
+	T_then  shift 50
+	.  error
+
+
+state 30
+	expr : T_let V_string . T_equal expr T_in expr  (2)
+
+	T_equal  shift 51
+	.  error
+
+
+state 31
+	expr : T_let T_rec . V_string T_equal expr T_in expr  (3)
+
+	V_string  shift 52
+	.  error
+
+
+state 32
+	expr4 : T_fst expr5 .  (20)
+
+	.  reduce 20
+
+
+state 33
+	expr4 : T_not expr5 .  (19)
+
+	.  reduce 19
+
+
+state 34
+	expr4 : T_snd expr5 .  (21)
+
+	.  reduce 21
+
+
+state 35
+	expr4 : T_sub expr5 .  (18)
+
+	.  reduce 18
+
+
+state 36
+	expr0 : expr0 . T_and expr1  (7)
+	expr6 : T_lpar expr0 . T_comma expr0 T_rpar  (27)
+	expr6 : T_lpar expr0 . T_rpar  (28)
+
+	T_and  shift 38
+	T_rpar  shift 53
+	T_comma  shift 54
+	.  error
+
+
+state 37
+	prog : expr T_eof .  (1)
+
+	.  reduce 1
+
+
+state 38
+	expr0 : expr0 T_and . expr1  (7)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr1  goto 55
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 39
+	expr1 : expr1 T_equal . expr2  (10)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr2  goto 56
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 40
+	expr1 : expr1 T_leq . expr2  (9)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr2  goto 57
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 41
+	expr2 : expr2 T_add . expr3  (12)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr3  goto 58
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 42
+	expr2 : expr2 T_sub . expr3  (13)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr3  goto 59
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 43
+	expr3 : expr3 T_mul . expr4  (15)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr4  goto 60
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 44
+	expr3 : expr3 T_div . expr4  (16)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr4  goto 61
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 45
+	args : expr6 .  (33)
+	args : expr6 . args  (34)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_lpar  shift 14
+	T_eof  reduce 33
+	T_else  reduce 33
+	T_in  reduce 33
+	T_then  reduce 33
+	T_add  reduce 33
+	T_sub  reduce 33
+	T_mul  reduce 33
+	T_div  reduce 33
+	T_equal  reduce 33
+	T_and  reduce 33
+	T_leq  reduce 33
+	T_rpar  reduce 33
+	T_comma  reduce 33
+
+	expr6  goto 45
+	args  goto 62
+	const  goto 24
+	bool  goto 25
+
+
+state 46
+	expr5 : expr6 args .  (24)
+
+	.  reduce 24
+
+
+state 47
+	par : T_lpar V_string . T_colon typ T_rpar  (37)
+
+	T_colon  shift 63
+	.  error
+
+
+state 48
+	expr : T_fun pars T_arrow . expr  (4)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 64
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 49
+	pars : par pars .  (36)
+
+	.  reduce 36
+
+
+state 50
+	expr : T_if expr T_then . expr T_else expr  (5)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 65
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 51
+	expr : T_let V_string T_equal . expr T_in expr  (2)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 66
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 52
+	expr : T_let T_rec V_string . T_equal expr T_in expr  (3)
+
+	T_equal  shift 67
+	.  error
+
+
+state 53
+	expr6 : T_lpar expr0 T_rpar .  (28)
+
+	.  reduce 28
+
+
+state 54
+	expr6 : T_lpar expr0 T_comma . expr0 T_rpar  (27)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr0  goto 68
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 55
+	expr0 : expr0 T_and expr1 .  (7)
+	expr1 : expr1 . T_leq expr2  (9)
+	expr1 : expr1 . T_equal expr2  (10)
+
+	T_equal  shift 39
+	T_leq  shift 40
+	T_eof  reduce 7
+	T_else  reduce 7
+	T_in  reduce 7
+	T_then  reduce 7
+	T_and  reduce 7
+	T_rpar  reduce 7
+	T_comma  reduce 7
+
+
+state 56
+	expr1 : expr1 T_equal expr2 .  (10)
+	expr2 : expr2 . T_add expr3  (12)
+	expr2 : expr2 . T_sub expr3  (13)
+
+	T_add  shift 41
+	T_sub  shift 42
+	T_eof  reduce 10
+	T_else  reduce 10
+	T_in  reduce 10
+	T_then  reduce 10
+	T_equal  reduce 10
+	T_and  reduce 10
+	T_leq  reduce 10
+	T_rpar  reduce 10
+	T_comma  reduce 10
+
+
+state 57
+	expr1 : expr1 T_leq expr2 .  (9)
+	expr2 : expr2 . T_add expr3  (12)
+	expr2 : expr2 . T_sub expr3  (13)
+
+	T_add  shift 41
+	T_sub  shift 42
+	T_eof  reduce 9
+	T_else  reduce 9
+	T_in  reduce 9
+	T_then  reduce 9
+	T_equal  reduce 9
+	T_and  reduce 9
+	T_leq  reduce 9
+	T_rpar  reduce 9
+	T_comma  reduce 9
+
+
+state 58
+	expr2 : expr2 T_add expr3 .  (12)
+	expr3 : expr3 . T_mul expr4  (15)
+	expr3 : expr3 . T_div expr4  (16)
+
+	T_mul  shift 43
+	T_div  shift 44
+	T_eof  reduce 12
+	T_else  reduce 12
+	T_in  reduce 12
+	T_then  reduce 12
+	T_add  reduce 12
+	T_sub  reduce 12
+	T_equal  reduce 12
+	T_and  reduce 12
+	T_leq  reduce 12
+	T_rpar  reduce 12
+	T_comma  reduce 12
+
+
+state 59
+	expr2 : expr2 T_sub expr3 .  (13)
+	expr3 : expr3 . T_mul expr4  (15)
+	expr3 : expr3 . T_div expr4  (16)
+
+	T_mul  shift 43
+	T_div  shift 44
+	T_eof  reduce 13
+	T_else  reduce 13
+	T_in  reduce 13
+	T_then  reduce 13
+	T_add  reduce 13
+	T_sub  reduce 13
+	T_equal  reduce 13
+	T_and  reduce 13
+	T_leq  reduce 13
+	T_rpar  reduce 13
+	T_comma  reduce 13
+
+
+state 60
+	expr3 : expr3 T_mul expr4 .  (15)
+
+	.  reduce 15
+
+
+state 61
+	expr3 : expr3 T_div expr4 .  (16)
+
+	.  reduce 16
+
+
+state 62
+	args : expr6 args .  (34)
+
+	.  reduce 34
+
+
+state 63
+	par : T_lpar V_string T_colon . typ T_rpar  (37)
+
+	T_bool  shift 69
+	T_int  shift 70
+	.  error
+
+	typ  goto 71
+	typ0  goto 72
+
+
+state 64
+	expr : T_fun pars T_arrow expr .  (4)
+
+	.  reduce 4
+
+
+state 65
+	expr : T_if expr T_then expr . T_else expr  (5)
+
+	T_else  shift 73
+	.  error
+
+
+state 66
+	expr : T_let V_string T_equal expr . T_in expr  (2)
+
+	T_in  shift 74
+	.  error
+
+
+state 67
+	expr : T_let T_rec V_string T_equal . expr T_in expr  (3)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 75
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 68
+	expr0 : expr0 . T_and expr1  (7)
+	expr6 : T_lpar expr0 T_comma expr0 . T_rpar  (27)
+
+	T_and  shift 38
+	T_rpar  shift 76
+	.  error
+
+
+state 69
+	typ0 : T_bool .  (41)
+
+	.  reduce 41
+
+
+state 70
+	typ0 : T_int .  (40)
+
+	.  reduce 40
+
+
+state 71
+	par : T_lpar V_string T_colon typ . T_rpar  (37)
+	typ : typ . T_mul typ0  (38)
+
+	T_mul  shift 77
+	T_rpar  shift 78
+	.  error
+
+
+state 72
+	typ : typ0 .  (39)
+
+	.  reduce 39
+
+
+state 73
+	expr : T_if expr T_then expr T_else . expr  (5)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 79
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 74
+	expr : T_let V_string T_equal expr T_in . expr  (2)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 80
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 75
+	expr : T_let T_rec V_string T_equal expr . T_in expr  (3)
+
+	T_in  shift 81
+	.  error
+
+
+state 76
+	expr6 : T_lpar expr0 T_comma expr0 T_rpar .  (27)
+
+	.  reduce 27
+
+
+state 77
+	typ : typ T_mul . typ0  (38)
+
+	T_bool  shift 69
+	T_int  shift 70
+	.  error
+
+	typ0  goto 82
+
+
+state 78
+	par : T_lpar V_string T_colon typ T_rpar .  (37)
+
+	.  reduce 37
+
+
+state 79
+	expr : T_if expr T_then expr T_else expr .  (5)
+
+	.  reduce 5
+
+
+state 80
+	expr : T_let V_string T_equal expr T_in expr .  (2)
+
+	.  reduce 2
+
+
+state 81
+	expr : T_let T_rec V_string T_equal expr T_in . expr  (3)
+
+	V_int  shift 3
+	V_string  shift 4
+	T_fun  shift 5
+	T_if  shift 6
+	T_let  shift 7
+	T_false  shift 8
+	T_true  shift 9
+	T_fst  shift 10
+	T_not  shift 11
+	T_snd  shift 12
+	T_sub  shift 13
+	T_lpar  shift 14
+	.  error
+
+	expr  goto 83
+	expr0  goto 17
+	expr1  goto 18
+	expr2  goto 19
+	expr3  goto 20
+	expr4  goto 21
+	expr5  goto 22
+	expr6  goto 23
+	const  goto 24
+	bool  goto 25
+
+
+state 82
+	typ : typ T_mul typ0 .  (38)
+
+	.  reduce 38
+
+
+state 83
+	expr : T_let T_rec V_string T_equal expr T_in expr .  (3)
+
+	.  reduce 3
+
+
+33 terminals, 18 nonterminals
+43 grammar rules, 84 states

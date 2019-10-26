@@ -21,7 +21,7 @@ let rec p_t oc t =
         |Tfunc(args, x, fenv) -> 
                     Printf.fprintf oc "(";
                     List.iter (fun x -> p_arg oc x) args;
-                    Printf.fprintf oc ")";
+                    Printf.fprintf oc ")";  
                     Printf.fprintf oc "->";
                     p_expr oc x;
                     Printf.fprintf oc " (Env: ";
@@ -38,18 +38,22 @@ let p_env oc en =
 
 let eval_unary op cnst =
     match cnst with
-        |Tint(x) -> Tint (-x);
-        |Tbool(b) -> Tbool (not b);
-        |Tprod(_,_) -> raise (T "Wrong type for unary\n");
-        |Tfunc(_,_,_) -> raise (T "Wrong type for unary\n");
-
+        |Tint(x) -> Tint (-x);                                          (*negation for integers*)
+        |Tbool(b) -> Tbool (not b);                                     (*negation for booleans*)
+        |Tfunc(_,_,_) -> raise (T "Wrong type for unary\n");              (*else not possible*)
+        |Tprod(frst,scnd) -> 
+            match op with
+                |Upfst -> frst;
+                |Upsnd -> scnd;
+                |_ -> raise (T "Wrong type for unary\n");
 ;;
+
 let eval_binary op cnst1 cnst2 = 
     match cnst1, cnst2 with
         |Tint(x1), Tint(x2) -> 
                     begin
                     match op with
-                        | Bband -> raise (T "Wrong type: BoolAnd with integers\n");
+                        | Bband -> raise (T "Wrong type: BoolAnd with integers\n");         (*boolean and, not for int*)
                         | Biadd -> Tint(x1 + x2);
                         | Bisub -> Tint(x1 - x2);
                         | Bimul -> Tint(x1 * x2);
@@ -69,13 +73,7 @@ let eval_binary op cnst1 cnst2 =
                         | Bceq  -> raise (T "Wrong type: equality with bool\n");
                     end
         |Tbool(_), Tint(_) -> raise (T "Not the same type\n");
-        |Tint(_), Tbool(_) -> raise (T "Wrong type for binop\n");
-        |Tint _, Tprod (_, _) -> raise (T "Wrong type for binop\n");
-        |Tint _, Tfunc (_, _,_) -> raise (T "Wrong type for binop\n");
-        |Tbool _, Tprod (_, _) -> raise (T "Wrong type for binop\n");
-        |Tbool _, Tfunc (_, _,_) -> raise (T "Wrong type for binop\n");
-        |Tprod(_,_), _ -> raise (T "Wrong type for binop\n");
-        |Tfunc(_,_,_), _ -> raise (T "Wrong type for binop\n");
+        |_, _ -> raise (T "Wrong type for binop\n");                 (*all other cases (Tprod and Tfunc) are wrong types for a binop operation*)
 ;;
 
 
@@ -96,7 +94,9 @@ let rec eval_expr env expr =
                 |Cbool(b) -> Tbool(b), env;
             end
         |Ename(name) -> StringMap.find name env, env;
-        |Eunary(uop, x) -> let foo = eval_expr env x in eval_unary uop (fst foo),snd foo;
+        |Eunary(uop, x) -> 
+            let foo = eval_expr env x in 
+            eval_unary uop (fst foo),snd foo;
         |Ebinary(bop, x, y) ->
             let foo1 = eval_expr env x in 
             let foo2 =  eval_expr (snd foo1) y in

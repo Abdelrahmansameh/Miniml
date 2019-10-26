@@ -3,17 +3,17 @@ open Ast
 let p_name oc (name: string) =
     Printf.fprintf oc "%s" name;;
 
-let p_const oc const = match const with
+let p_const oc const = match const with                         (*const is either int or bool*)
                     |Cint(x) -> Printf.fprintf oc "%d" x;
                     |Cbool(b) -> Printf.fprintf oc "%b" b;
 ;;
-let p_uop oc uop = match uop with
+let p_uop oc uop = match uop with                               (*Unary operations*)
                   |Uineg -> Printf.fprintf oc "-";
                   |Ubnot -> Printf.fprintf oc "!";
                   |Upfst -> Printf.fprintf oc "first";
                   |Upsnd -> Printf.fprintf oc "second";
 ;;
-let p_bop oc bop = match bop with
+let p_bop oc bop = match bop with                               (*Binary operations*)
                   |Biadd -> Printf.fprintf oc "+";
                   |Bisub -> Printf.fprintf oc "-";
                   |Bimul -> Printf.fprintf oc "*";

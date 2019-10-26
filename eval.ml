@@ -40,13 +40,13 @@ let eval_unary op cnst =
     match cnst with
         |Tint(x) -> Tint (-x);                                          (*negation for integers*)
         |Tbool(b) -> Tbool (not b);                                     (*negation for booleans*)
-        |Tfunc(_,_,_) -> raise (T "Wrong type for unary\n");              (*else not possible*)
+        |Tfunc(_,_,_) -> raise (T "Wrong type for unary\n");     
         |Tprod(frst,scnd) -> 
             match op with
                 |Upfst -> frst;
                 |Upsnd -> scnd;
                 |_ -> raise (T "Wrong type for unary\n");
-;;
+;; 
 
 let eval_binary op cnst1 cnst2 = 
     match cnst1, cnst2 with
